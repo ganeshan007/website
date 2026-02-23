@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SlimClaw: A Personal AI Assistant You Can Set Up in 5 Minutes</title>
+  <meta name="author" content="Ganeshan Malhotra">
+  <meta name="description" content="I built a personal Claude assistant that runs on WhatsApp, uses 30 MB of memory, and doesn't need an AI IDE to set up.">
+  <meta property="og:title" content="SlimClaw: A Personal AI Assistant You Can Set Up in 5 Minutes">
+  <meta property="og:description" content="30 MB idle, standalone CLI setup, model selection, group auto-detection. Built in Python, runs Claude agents in Docker containers.">
+  <meta property="og:type" content="article">
+  <link rel="icon" type="image/jpg" href="../images/avatar.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+    :root {
+      --bg: #0C0C0E;
+      --bg-elevated: #151518;
+      --bg-card: #1A1A1F;
+      --bg-card-hover: #1F1F26;
+      --text-primary: #E8E6E1;
+      --text-secondary: #9B978F;
+      --text-tertiary: #6B6860;
+      --accent: #D4A574;
+      --accent-dim: #B8896040;
+      --accent-glow: #D4A57420;
+      --border: #2A2A30;
+      --border-light: #3A3A42;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --sans: 'Instrument Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    [data-theme="light"] {
+      --bg: #F6F4F0;
+      --bg-elevated: #EDEAE4;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #FAF8F5;
+      --text-primary: #1A1816;
+      --text-secondary: #6B6560;
+      --text-tertiary: #9B958E;
+      --accent: #A0714A;
+      --accent-dim: #A0714A25;
+      --accent-glow: #A0714A15;
+      --border: #DDD8D0;
+      --border-light: #C8C2B8;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.8;
+      font-size: 17px;
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.5s ease, color 0.4s ease;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 200px;
+    }
+
+    .ambient-glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+      top: -200px;
+      right: -100px;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(80px);
+    }
+
+    /* Nav */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 0 2rem;
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      background: color-mix(in srgb, var(--bg) 80%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+    .nav-logo {
+      font-family: var(--serif);
+      font-size: 1.2rem;
+      color: var(--text-primary);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: color 0.3s ease;
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    .theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* Article */
+    article {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 120px 2rem 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .article-meta {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+    }
+
+    .article-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+
+    h2 {
+      font-family: var(--serif);
+      font-size: 1.6rem;
+      font-weight: 400;
+      margin: 3rem 0 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    h3 {
+      font-family: var(--sans);
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 2rem 0 0.75rem;
+      color: var(--text-primary);
+    }
+
+    p {
+      margin-bottom: 1.25rem;
+      color: var(--text-secondary);
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    strong { color: var(--text-primary); font-weight: 600; }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.85em;
+      background: var(--bg-card);
+      padding: 0.15em 0.4em;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    pre {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      overflow-x: auto;
+      margin: 1.5rem 0;
+      line-height: 1.5;
+    }
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+    }
+
+    ul, ol {
+      margin: 1rem 0 1.5rem 1.5rem;
+      color: var(--text-secondary);
+    }
+    li { margin-bottom: 0.5rem; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.9rem;
+    }
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-tertiary);
+      font-weight: 500;
+    }
+    td { color: var(--text-secondary); }
+    td:first-child { color: var(--text-primary); }
+
+    blockquote {
+      border-left: 2px solid var(--accent);
+      padding: 0.5rem 0 0.5rem 1.5rem;
+      margin: 1.5rem 0;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 3rem 0;
+    }
+
+    .cta-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 2rem 0;
+      text-align: center;
+    }
+    .cta-box p { color: var(--text-primary); margin-bottom: 1rem; }
+    .cta-box code { font-size: 1rem; padding: 0.5em 1em; }
+
+    footer {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: var(--text-tertiary);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--text-secondary); }
+
+    @media (max-width: 640px) {
+      article { padding: 100px 1.25rem 60px; }
+      pre { padding: 1rem; font-size: 0.8rem; }
+      table { font-size: 0.8rem; }
+      th, td { padding: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-glow"></div>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="../index.html" class="nav-logo">Ganeshan Malhotra</a>
+      <ul class="nav-links">
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="https://github.com/ganeshan007/slimclaw" target="_blank">GitHub</a></li>
+        <li>
+          <button class="theme-toggle" onclick="document.documentElement.toggleAttribute('data-theme') || document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'light' ? '' : 'light')">
+            <span id="theme-icon">&#9790;</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <article>
+    <div class="article-meta">February 2026 &middot; Project</div>
+
+    <h1>SlimClaw: A Personal AI Assistant You Can Set Up in 5 Minutes</h1>
+
+    <div class="article-subtitle">
+      I wanted a Claude assistant on WhatsApp that I could actually understand, set up without an AI IDE, and run on a machine with 30 MB to spare.
+    </div>
+
+    <p>
+      I've been running <a href="https://github.com/qwibitai/nanoclaw">NanoClaw</a> for a while. It's a great project &mdash; a minimal Claude assistant on WhatsApp, built in TypeScript with container isolation. But every time I wanted to tweak something or debug an issue, I found myself fighting the Node.js runtime: 100 MB idle, native SQLite addons that break across versions, and a setup flow that assumed you had Claude Code installed.
+    </p>
+
+    <p>
+      Around the same time, <a href="https://github.com/HKUDS/nanobot">nanobot</a> showed that a personal AI agent doesn't need a complex architecture &mdash; <code>pip install nanobot-ai</code> and you're running. No Docker required, no IDE required, just Python and a config file.
+    </p>
+
+    <p>
+      I wanted both: NanoClaw's container isolation and per-group memory, with nanobot's simplicity of setup. So I built SlimClaw.
+    </p>
+
+    <h2>What is it</h2>
+
+    <p>
+      <a href="https://github.com/ganeshan007/slimclaw">SlimClaw</a> is a personal Claude assistant accessible via WhatsApp. You message it from your phone, and it responds using Claude's API running inside isolated Docker containers. Each group gets its own filesystem, memory, and conversation history.
+    </p>
+
+    <p>
+      The entire thing is a single Python process. An <code>asyncio</code> event loop runs three tasks: a message poller (2s), an IPC watcher (1s), and a task scheduler (60s). That's it.
+    </p>
+
+    <h2>Setup in one command</h2>
+
+    <p>
+      The thing I cared about most was onboarding. NanoClaw requires Claude Code for setup (<code>/setup</code> skill). nanobot requires editing a JSON config file. I wanted something in between &mdash; an interactive wizard that works in any terminal.
+    </p>
+
+    <pre><code>pip install slimclaw
+slimclaw-setup</code></pre>
+
+    <p>
+      The wizard walks you through 13 steps: name your bot (default: TARS), choose your app (WhatsApp, or suggest a skill for Telegram/Discord), check dependencies, build the container, authenticate WhatsApp (QR code opens in your browser), pick a Claude model (Haiku/Sonnet/Opus), register your main channel, and start the service.
+    </p>
+
+    <p>
+      No AI IDE needed. No JSON config files. If you have Claude Code, you can also run <code>/setup</code> for an AI-guided experience that troubleshoots errors for you &mdash; but it's optional.
+    </p>
+
+    <h2>What I learned building it</h2>
+
+    <h3>neonize's Go runtime doesn't play nice with Python</h3>
+
+    <p>
+      SlimClaw uses <a href="https://github.com/krypton-byte/neonize">neonize</a>, a Python binding for whatsmeow (Go-based WhatsApp library). The problem: neonize's callbacks run in Go threads, not the Python asyncio thread. Every SQLite call from a callback crashed with "objects created in a thread can only be used in that same thread." The fix: <code>call_soon_threadsafe</code> to dispatch everything to the asyncio loop.
+    </p>
+
+    <p>
+      Worse, <code>os._exit(0)</code> doesn't kill the Go runtime. The process stays alive after authentication because Go threads keep running. I ended up using <code>SIGKILL</code> from a Go thread callback with pre-captured closure references &mdash; the only reliable way to terminate.
+    </p>
+
+    <h3>Timestamps in milliseconds, not seconds</h3>
+
+    <p>
+      neonize returns timestamps in milliseconds. The guard check (<code>> year 2100</code>) rejected every single message as "year 58112." One line fix, hours of debugging.
+    </p>
+
+    <h3>The duplicate container race condition</h3>
+
+    <p>
+      At startup, <code>_recover_pending_messages()</code> and <code>_start_message_loop()</code> both find the same unprocessed messages. Both call <code>enqueue_message_check()</code>. Both see <code>state.active = False</code> because <code>asyncio.create_task</code> doesn't execute immediately &mdash; it just schedules. Two containers spawn for the same group.
+    </p>
+
+    <p>
+      Fix: set <code>state.active = True</code> at scheduling time, not inside the async task.
+    </p>
+
+    <h3>Scheduled tasks that never run</h3>
+
+    <p>
+      The scheduler polls <code>get_due_tasks()</code> every 60 seconds. A task is "due" if <code>next_run &lt;= now</code>. But <code>next_run</code> doesn't update until the task finishes executing. So the same task gets re-enqueued on every poll. And if the inflight tracker marks it before the queue actually runs it, the task is stuck forever.
+    </p>
+
+    <p>
+      Three separate fixes for this: inflight tracking moved inside the execution wrapper, idle container stdin closed when a task is queued, and a 15-second scheduler startup delay so WhatsApp can connect first.
+    </p>
+
+    <h2>The "Skills over Features" approach</h2>
+
+    <p>
+      Instead of building every integration into the codebase, SlimClaw uses <a href="https://docs.anthropic.com/en/docs/claude-code/skills">Claude Code skills</a>. A skill is a markdown file in <code>.claude/skills/</code> that teaches Claude Code how to transform the project.
+    </p>
+
+    <p>
+      Want Telegram support? If <code>.claude/skills/add-telegram/SKILL.md</code> exists, the setup wizard routes to it. If it doesn't, it tells you how to contribute one. The core stays small.
+    </p>
+
+    <p>
+      Current skills: <code>/setup</code> (onboarding), <code>/customize</code> (add apps, change behavior), <code>/debug</code> (container troubleshooting).
+    </p>
+
+    <h2>Auto-detection in unregistered groups</h2>
+
+    <p>
+      One pattern I borrowed from neither NanoClaw nor nanobot: when someone mentions <code>@TARS</code> in a WhatsApp group that isn't registered, instead of silently ignoring it, SlimClaw sends a notification to your main channel:
+    </p>
+
+    <blockquote>
+      Alice mentioned @TARS in <strong>Family Chat</strong> (not registered). To add this group, say: <strong>join Family Chat</strong>
+    </blockquote>
+
+    <p>
+      You reply "join Family Chat" and the group is registered. No JIDs, no JSON files, no SQL. Just natural language.
+    </p>
+
+    <h2>Benchmarks</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>SlimClaw</th>
+          <th>NanoClaw</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Idle RSS</td>
+          <td><strong>30.2 MB</strong></td>
+          <td>100.3 MB</td>
+        </tr>
+        <tr>
+          <td>Final RSS</td>
+          <td><strong>54.1 MB</strong></td>
+          <td>138.9 MB</td>
+        </tr>
+        <tr>
+          <td>SQLite insert (10K)</td>
+          <td>482 ms</td>
+          <td><strong>52 ms</strong></td>
+        </tr>
+        <tr>
+          <td>SQLite query (10K)</td>
+          <td>35 ms</td>
+          <td><strong>7.6 ms</strong></td>
+        </tr>
+        <tr>
+          <td>Dependencies</td>
+          <td>6</td>
+          <td>9</td>
+        </tr>
+        <tr>
+          <td>Source lines</td>
+          <td>4,670</td>
+          <td>6,650</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>
+      Python uses 2x less memory. Node.js is faster at SQLite (native C++ addon with better-sqlite3). Both run the same Docker containers for agent execution.
+    </p>
+
+    <h2>Try it</h2>
+
+    <div class="cta-box">
+      <p><strong>Get started in one command:</strong></p>
+      <code>pip install slimclaw && slimclaw-setup</code>
+      <p style="margin-top: 1rem; margin-bottom: 0;">
+        <a href="https://github.com/ganeshan007/slimclaw">GitHub</a> &middot;
+        <a href="https://pypi.org/project/slimclaw/">PyPI</a>
+      </p>
+    </div>
+
+    <p>
+      Requirements: Python 3.11+, Docker, macOS or Linux. The setup wizard handles everything else.
+    </p>
+
+    <hr class="divider">
+
+    <p>
+      If you're running OpenClaw or NanoClaw and want something lighter, or if you tried nanobot and want container isolation, SlimClaw sits in between. It's ~4,700 lines of Python, 6 dependencies, and a setup flow that doesn't assume you have an AI IDE installed.
+    </p>
+
+  </article>
+
+  <footer>
+    <a href="../index.html">&larr; Back to homepage</a>
+  </footer>
+
+  <script>
+    // Theme toggle
+    const toggle = document.querySelector('.theme-toggle');
+    const icon = document.getElementById('theme-icon');
+    const saved = localStorage.getItem('theme');
+    if (saved === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      icon.textContent = '\u2600';
+    }
+    toggle?.addEventListener('click', () => {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      if (isLight) {
+        document.documentElement.removeAttribute('data-theme');
+        icon.textContent = '\u263E';
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        icon.textContent = '\u2600';
+        localStorage.setItem('theme', 'light');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,374 +1,1088 @@
-<!DOCTYPE HTML>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Spectral&display=swap');
-</style>
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ganeshan Malhotra</title>
-  
   <meta name="author" content="Ganeshan Malhotra">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  
-  <link rel="stylesheet" type="text/css" href="stylesheet.css">
   <link rel="icon" type="image/jpg" href="images/avatar.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+    :root {
+      --bg: #0C0C0E;
+      --bg-elevated: #151518;
+      --bg-card: #1A1A1F;
+      --bg-card-hover: #1F1F26;
+      --text-primary: #E8E6E1;
+      --text-secondary: #9B978F;
+      --text-tertiary: #6B6860;
+      --accent: #D4A574;
+      --accent-dim: #B8896040;
+      --accent-glow: #D4A57420;
+      --border: #2A2A30;
+      --border-light: #3A3A42;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --sans: 'Instrument Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    [data-theme="light"] {
+      --bg: #F6F4F0;
+      --bg-elevated: #EDEAE4;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #FAF8F5;
+      --text-primary: #1A1816;
+      --text-secondary: #6B6560;
+      --text-tertiary: #9B958E;
+      --accent: #A0714A;
+      --accent-dim: #A0714A25;
+      --accent-glow: #A0714A15;
+      --border: #DDD8D0;
+      --border-light: #C8C2B8;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-light) transparent;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.7;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      transition: background 0.5s ease, color 0.4s ease;
+    }
+
+    /* ─── Grain overlay ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 200px;
+    }
+
+    /* ─── Ambient glow ─── */
+    .ambient-glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+      top: -200px;
+      right: -100px;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(80px);
+      transition: background 0.5s ease;
+    }
+    .ambient-glow-2 {
+      position: fixed;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      bottom: -150px;
+      left: -100px;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(100px);
+      transition: background 0.5s ease;
+    }
+
+    /* ─── Nav ─── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 0 2rem;
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      background: color-mix(in srgb, var(--bg) 80%, transparent);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.5s ease, border-color 0.4s ease;
+    }
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+    .nav-logo {
+      font-family: var(--serif);
+      font-size: 1.2rem;
+      color: var(--text-primary);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: color 0.3s ease;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--accent);
+      transition: width 0.4s var(--ease-out);
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a:hover::after { width: 100%; }
+
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    .theme-toggle:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: rotate(30deg);
+    }
+
+    /* ─── Hamburger menu ─── */
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      position: relative;
+      z-index: 200;
+    }
+    .hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--text-primary);
+      margin: 5px auto;
+      transition: all 0.3s ease;
+      border-radius: 1px;
+    }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+    /* ─── Main wrapper ─── */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* ─── Section headings ─── */
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .section-label::before {
+      content: '';
+      width: 24px;
+      height: 1px;
+      background: var(--accent);
+    }
+    .section-title {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 2.5rem;
+      color: var(--text-primary);
+    }
+
+    section {
+      padding: 5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    section:last-of-type { border-bottom: none; }
+
+    /* ─── Hero ─── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding-top: 60px;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 4rem;
+      align-items: center;
+      width: 100%;
+    }
+    .hero-text { position: relative; }
+    .hero-greeting {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .hero-greeting::before {
+      content: '';
+      width: 32px;
+      height: 1px;
+      background: var(--accent);
+    }
+    .hero-name {
+      font-family: var(--serif);
+      font-size: clamp(3.2rem, 7vw, 5.5rem);
+      font-weight: 300;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+      color: var(--text-primary);
+    }
+    .hero-name em {
+      font-style: italic;
+      font-weight: 300;
+      color: var(--accent);
+    }
+    .hero-tagline {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin-bottom: 2rem;
+      line-height: 1.75;
+    }
+    .hero-tagline a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s ease;
+    }
+    .hero-tagline a:hover { border-bottom-color: var(--accent); }
+    .hero-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 2rem;
+    }
+    .hero-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1.2rem;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      transition: all 0.3s var(--ease-out);
+    }
+    .hero-link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+    .hero-link svg {
+      width: 15px;
+      height: 15px;
+      opacity: 0.7;
+    }
+
+    .hero-photo-wrapper {
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+    .hero-photo-frame {
+      position: relative;
+      width: 280px;
+      height: 340px;
+    }
+    .hero-photo-frame::before {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border: 1px solid var(--accent-dim);
+      border-radius: 200px 200px 20px 20px;
+      transition: border-color 0.4s ease;
+    }
+    .hero-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 200px 200px 16px 16px;
+      filter: grayscale(15%) contrast(1.05);
+      transition: filter 0.5s ease, transform 0.5s var(--ease-out);
+    }
+    .hero-photo-frame:hover .hero-photo {
+      filter: grayscale(0%) contrast(1.1);
+      transform: scale(1.02);
+    }
+    .hero-photo-frame:hover::before {
+      border-color: var(--accent);
+    }
+    .hero-photo-decoration {
+      position: absolute;
+      bottom: -20px;
+      right: -20px;
+      width: 80px;
+      height: 80px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-elevated);
+      font-family: var(--serif);
+      font-size: 1.6rem;
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    /* ─── News / Timeline ─── */
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 8px;
+      bottom: 8px;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--accent), var(--border));
+    }
+    .timeline-item {
+      position: relative;
+      padding-bottom: 1.5rem;
+      padding-left: 0;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -2rem;
+      top: 10px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--bg);
+      z-index: 1;
+      transition: transform 0.3s var(--ease-spring);
+    }
+    .timeline-item:hover::before {
+      transform: scale(1.5);
+    }
+    .timeline-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+    .timeline-content {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .timeline-content a {
+      color: var(--text-primary);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      transition: border-color 0.3s ease, color 0.3s ease;
+    }
+    .timeline-content a:hover {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* ─── Education ─── */
+    .edu-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    .edu-card {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--bg-card);
+      transition: all 0.4s var(--ease-out);
+    }
+    .edu-card:hover {
+      border-color: var(--accent-dim);
+      background: var(--bg-card-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px -10px rgba(0,0,0,0.3);
+    }
+    .edu-logo {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      flex-shrink: 0;
+      border-radius: 12px;
+      padding: 4px;
+      background: var(--bg-elevated);
+    }
+    .edu-info h3 {
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .edu-info p {
+      font-size: 0.82rem;
+      color: var(--text-tertiary);
+    }
+
+    /* ─── Experience ─── */
+    .exp-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .exp-card {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 1.5rem;
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--bg-card);
+      transition: all 0.4s var(--ease-out);
+      text-decoration: none;
+      color: inherit;
+    }
+    .exp-card:hover {
+      border-color: var(--accent-dim);
+      background: var(--bg-card-hover);
+      transform: translateX(6px);
+      box-shadow: 0 8px 30px -8px rgba(0,0,0,0.3);
+    }
+    .exp-logo-wrap {
+      width: 80px;
+      height: 64px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--bg-elevated);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .exp-logo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+    .exp-logo-wrap img.aurasell-logo {
+      object-fit: contain;
+      padding: 8px;
+    }
+    [data-theme="light"] .exp-logo-wrap img.aurasell-logo {
+      filter: invert(1);
+    }
+    .exp-details { display: flex; flex-direction: column; justify-content: center; }
+    .exp-org {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 0.15rem;
+    }
+    .exp-role {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--accent);
+      letter-spacing: 0.02em;
+      margin-bottom: 0.35rem;
+    }
+    .exp-desc {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ─── Publications ─── */
+    .pub-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .pub-card {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 2rem;
+      padding: 1.75rem;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--bg-card);
+      transition: all 0.4s var(--ease-out);
+      text-decoration: none;
+      color: inherit;
+    }
+    .pub-card:hover {
+      border-color: var(--accent-dim);
+      background: var(--bg-card-hover);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px -12px rgba(0,0,0,0.3);
+    }
+    .pub-image-wrap {
+      width: 180px;
+      height: 130px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--bg-elevated);
+    }
+    .pub-image-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s var(--ease-out);
+    }
+    .pub-card:hover .pub-image-wrap img {
+      transform: scale(1.06);
+    }
+    .pub-details { display: flex; flex-direction: column; justify-content: center; }
+    .pub-title {
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      line-height: 1.4;
+      margin-bottom: 0.6rem;
+      letter-spacing: -0.01em;
+      transition: color 0.3s ease;
+    }
+    .pub-card:hover .pub-title { color: var(--accent); }
+    .pub-authors {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+    }
+    .pub-authors strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .pub-venue {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* ─── Footer ─── */
+    footer {
+      padding: 3rem 0;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      border-top: 1px solid var(--border);
+    }
+    footer a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    footer a:hover { color: var(--accent); }
+
+    /* ─── Scroll animations ─── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    /* ─── Hero stagger ─── */
+    .hero-text > * {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: heroReveal 0.8s var(--ease-out) forwards;
+    }
+    .hero-text > *:nth-child(1) { animation-delay: 0.1s; }
+    .hero-text > *:nth-child(2) { animation-delay: 0.25s; }
+    .hero-text > *:nth-child(3) { animation-delay: 0.4s; }
+    .hero-text > *:nth-child(4) { animation-delay: 0.55s; }
+    .hero-text > *:nth-child(5) { animation-delay: 0.7s; }
+    .hero-photo-wrapper {
+      opacity: 0;
+      transform: translateY(30px) scale(0.95);
+      animation: heroReveal 1s var(--ease-out) 0.3s forwards;
+    }
+    @keyframes heroReveal {
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ─── Mobile nav overlay ─── */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 150;
+      background: color-mix(in srgb, var(--bg) 95%, transparent);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a {
+      color: var(--text-primary);
+      text-decoration: none;
+      font-family: var(--serif);
+      font-size: 2rem;
+      letter-spacing: -0.02em;
+      opacity: 0.7;
+      transition: opacity 0.3s, color 0.3s;
+    }
+    .mobile-nav a:hover { opacity: 1; color: var(--accent); }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 820px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+        text-align: center;
+      }
+      .hero-text { order: 2; }
+      .hero-photo-wrapper { order: 1; }
+      .hero-greeting { justify-content: center; }
+      .hero-tagline { margin-left: auto; margin-right: auto; }
+      .hero-links { justify-content: center; }
+      .hero-photo-frame { width: 220px; height: 270px; }
+
+      .nav-links { display: none; }
+      .hamburger { display: block; }
+
+      .pub-card { grid-template-columns: 1fr; }
+      .pub-image-wrap { width: 100%; height: 180px; }
+      .edu-grid { grid-template-columns: 1fr; }
+      .exp-card { grid-template-columns: 60px 1fr; gap: 1rem; }
+      .exp-logo-wrap { width: 60px; height: 48px; }
+
+      section { padding: 3.5rem 0; }
+      main { padding: 0 1.25rem; }
+      nav { padding: 0 1.25rem; }
+    }
+
+    @media (max-width: 480px) {
+      .hero-name { font-size: 2.4rem; }
+      .hero-link { padding: 0.45rem 0.9rem; font-size: 0.75rem; }
+    }
+  </style>
 </head>
+<body>
+  <div class="ambient-glow"></div>
+  <div class="ambient-glow-2"></div>
 
-<body style="background-color:rgb(255, 255, 255);">
-  <table style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-    <tr style="padding:0px">
-      <td style="padding:0px">
-        <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-          <tr style="padding:0px">
-            <td style="padding:2.5%;width:63%;vertical-align:middle">
-              <p style="text-align:center; font-family: Spectral;">
-                <name style="font-family: Spectral;">Ganeshan Malhotra</name>
-              </p>
-              <p style="font-size: 14px; font-family: Spectral;">
-                I am Ganeshan Malhotra, a grad student at University of California, San Diego, specializing in Machine Learning and Data Science. Currently I'm working as a Machine Learning Engineer Intern at <a href="https://www.sybill.ai">Sybill.ai</a>. Previously, I worked as a Machine Learning Engineer at <a href="https://quantiphi.com/">Quantiphi, Inc.</a> My research interests span a wide range of topics in Deep Learning with a focus on Natural Language Processing and Computational Linguistics. 
-              </p>
-              <p style="font-size: 14px; font-family: Spectral;">
-                I have worked with <a href="https://www.inf.uni-hamburg.de/en/inst/ab/lt/people/oezge-alacam.html">Dr. Ozge Alacam</a> and <a href="https://www.inf.uni-hamburg.de/en/inst/ab/lt/people/chris-biemann.html">Dr. Chris Biemann</a> at LT Group, University of Hamburg where I worked towards incorporating gaze-embeddings in multi-modal learning systems.
-              </p>
-              <p style="font-size: 14px; font-family: Spectral;">
-                I have also worked with <a href="http://faculty.iiitd.ac.in/~tanmoy/"> Dr. Tanmoy Chakraborty </a> and <a href="https://www.iiitd.ac.in/shad">Dr. Md. Shad Akhtar</a> at Laboratory for Computational Social Systems (LCS2). Many moons ago, I worked with <a href="https://www.bits-pilani.ac.in/goa/naveeng/profile"> Dr. Naveen Gupta </a>to design OFDMA-NOMA techniques that could improve 5g communications. Our <a href="https://ieeexplore.ieee.org/abstract/document/9239456">work</a> was accepted at International Conference on Telecommunications, 2020.
-              </p>
-              <p style="font-size: 14px; font-family: Spectral;">
-                My research objective is to build human-like interactive agents that can comprehensively understand the world around us.
-              </p>
-              <p style="text-align:center">
-                <a href="mailto:ganeshanmalhotra@gmail.com">Email</a> &nbsp/&nbsp
-                <a href="data/Resume_Ganeshan_Publications.pdf">Resume</a> &nbsp/&nbsp
-                <a href="data/MY_CV.pdf">CV</a> &nbsp/&nbsp
-                <a href="https://linkedin.com/in/ganeshan007">LinkedIn</a> &nbsp/&nbsp
-                <a href="https://scholar.google.com/citations?user=P9q5ZPwAAAAJ&hl=en&authuser=1">Scholar</a> &nbsp/&nbsp
-                <!-- <a href="data/JonBarron-bio.txt">Bio</a> &nbsp/&nbsp -->
-                <!-- <a href="https://scholar.google.com/citations?hl=en&user=jktWnL8AAAAJ">Google Scholar</a> &nbsp/&nbsp -->
-                <!-- <a href="https://twitter.com/jon_barron">Twitter</a> &nbsp/&nbsp -->
-                <a href="https://github.com/ganeshan007/">Github</a> &nbsp/&nbsp
-                <a href="books.html">Books</a>
-              </p>
-            </td>
-            <td style="padding:2.5%;width:40%;max-width:40%">
-              <a href="images/avatar.jpg"><img style="width:100%;max-width:100%" alt="profile photo" src="images/avatar.jpg" class="hoverZoomLink"></a>
-            </td>
-          </tr>
-        </tbody></table>
-        <!-- <a id="Books"></a>
-        <p>Heads You Win</p> -->
-        <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-          <tr>
-            <td style="padding:20px;width:100%;vertical-align:middle">
-              <heading>News</heading>
-              <ul>
-                <li style="font-size:13 px; font-family: Spectral;"><mark style="background-color: aliceblue;">June, 2023</mark> :
-                  Started Working as a Machine Learning Engineer Intern at <a href="https://www.sybill.ai">Sybill.ai!</a></li>
-                <li style="font-size:13 px; font-family: Spectral;"><mark style="background-color: aliceblue;">September, 2022</mark> : Started graduate studies at <a href="https://www.ucsd.edu">University of California, San Diego!</a></li>
-                <li style="font-size:13 px; font-family: Spectral;"><mark style="background-color: aliceblue;">May, 2022</mark> : Paper accepted at <a href="https://www.lcs2.in/CONSTRAINT-2022/">CONSTRAINT(co-located with ACL), 2022!</a></li>
-                <li style="font-size:13 px; font-family: Spectral;"><mark style="background-color: aliceblue;">October, 2021</mark> : Paper accepted at <a href="https://www.wsdm-conference.org/2022/">ACM WSDM, 2022!</a></li>
-                <li style="font-size:13 px; font-family: Spectral;"><mark style="background-color: aliceblue;">August, 2021</mark> : Paper accepted at <a href="https://icmi.acm.org/2021/">ACM-ICMI, 2021!</a></li>
-                <li style="font-size:13 px; font-family: Spectral;"><mark style="background-color: aliceblue;">July, 2021</mark> : Joined <a href="https://www.quantiphi.com">Quantiphi, Inc.</a> as Machine Learning Engineer.</li>
-                <li style="font-size:13 px; font-family: Spectral;"><mark style="background-color: aliceblue;">June, 2021</mark> : Graduated from BITS Pilani, K.K. Birla Goa Campus.</li>
-                <li style="font-size:13 px; font-family: Spectral;"><mark style="background-color: aliceblue;">December, 2020</mark> : Volunteer at COLING 2020. </li>
-                <li style="font-size:13 px; font-family: Spectral;"><mark style="background-color: aliceblue;">November, 2020</mark> : Volunteer at EMNLP 2020. </li>
-              </ul>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-        <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-          <tr>
-            <td style="padding:20px;width:25%;vertical-align:middle;text-align: justify;">
-              <heading>Education</heading>
-              <p>
-              </p>
-              <div>
-                <img src='images/ucsd-logo.png' width="160">
-              </div>
-            </td>
-            <td style="padding:20px;width:25%;vertical-align:middle">
-              <p>
-              </p>
-              <div>
-                <img src='images/bits_logo.png' width="160">
-              </div>
-            </td>
+  <!-- Nav -->
+  <nav>
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">GM</a>
+      <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#news">News</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#publications">Publications</a></li>
+        <li><a href="books.html">Books</a></li>
+      </ul>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+        <button class="hamburger" onclick="toggleMenu()" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
 
-            <!-- <td style="padding:20px;width:75%;vertical-align:middle">
-              <p style="font-size: medium; text-align: center;">
-                BITS Pilani K.K. Birla Goa Campus, 2017-2021
-              </p>
-              <p style="text-align:center;">
-                B.E. Electronics and Instrumentation
-              </p>
-            </td> -->
-          </tr>
-  
-        </tbody>
+  <!-- Mobile nav -->
+  <div class="mobile-nav" id="mobileNav">
+    <a href="#about" onclick="closeMenu()">About</a>
+    <a href="#news" onclick="closeMenu()">News</a>
+    <a href="#experience" onclick="closeMenu()">Experience</a>
+    <a href="#publications" onclick="closeMenu()">Publications</a>
+    <a href="books.html">Books</a>
+  </div>
 
-        <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
-          <tbody>
-            <tr>
-              <td style="padding:20px;width:100%;vertical-align:middle">
-                <heading>Work Experience</heading>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        
-        <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
-          <tbody>
-            <tr>
-              <td style="padding:20px;width:25%;vertical-align:middle">
-                <div class="one">
-                  <img src='images/sybill_logo.jpeg' width='200' height="120">
-                </div>
-              </td>
-              <td style="padding:10px;width:75%;vertical-align:middle;padding-left:40px;">
-                <a style="color: black; font-size: medium; font-weight: bold;" href="https://www.sybill.ai" <p><u>Sybill.ai,
-                    Inc.</u></p></a>
-                <p style="color:rebeccapurple; font-size: larger;">Machine Learning Engineer Intern</p>
-                <!-- <p style="font-size: larger;">Worked on Cross-Modal Learning, focussing on enhancing text comprehension by using visual cues.</p> -->
-                <br>
-                <p></p>
-              </td>
-            </tr>
-        
-          </tbody>
-        </table>
-        
-        <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
-          <tbody>
-            <tr>
-              <td style="padding:20px;width:25%;vertical-align:middle">
-                <div class="one">
-                  <img src='data/quantiphi_gif.gif' width='200' height="160">
-                  <!-- <video playsinline="" muted="" preload="auto" src="https://cdn.quantiphi.com/2021/01/658aff82-website-banner-s.mp4" poster="https://cdn.quantiphi.com/2021/01/e43935a5-equation.png" data-video-mobile="https://cdn.quantiphi.com/2021/01/ea80d38c-website-banner-mobile-view-low-size.mp4"></video> -->
-        
-                </div>
-              </td>
-              <td style="padding:10px;width:75%;vertical-align:middle;padding-left:40px;">
-                <a style="color: black; font-size: medium; font-weight: bold;" href="https://www.quantiphi.com" <p><u>Quantiphi,
-                    Inc.</u></p></a>
-                <p style="color:rebeccapurple; font-size: larger;">Machine Learning Engineer</p>
-                <p style="font-size: larger;">Worked in the GCP Applied AI team, delivering projects across Computer Vision and
-                  Natural Language Processing.</p>
-                <br>
-                <p></p>
-              </td>
-            </tr>
-        
-          </tbody>
-        </table>
-        <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
-          <tbody>
-            <tr>
-              <td style="padding:20px;width:25%;vertical-align:middle">
-                <div class="one">
-                  <img src='images/LTgroup.jpg' width='200' height="160">
-                </div>
-              </td>
-              <td style="padding:10px;width:75%;vertical-align:middle;padding-left:40px;">
-                <a style="color: black; font-size: medium; font-weight: bold;"
-                  href="https://www.inf.uni-hamburg.de/en/inst/ab/lt/home.html" <p><u>Language Technology Group, University of
-                    Hamburg</u></p></a>
-                <p style="color:rebeccapurple; font-size: larger;">Research Collaborator</p>
-                <p style="font-size: larger;">Worked on Cross-Modal Learning, focussing on enhancing text comprehension by using
-                  visual cues.</p>
-                <br>
-                <p></p>
-              </td>
-            </tr>
-        
-          </tbody>
-        </table>
-        
-        
-        <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
-          <tbody>
-        
-            <tr>
-              <td style="padding:20px;width:25%;vertical-align:middle">
-                <div class="one">
-                  <img src='images/lcs2.png' width="200" height="160">
-                </div>
-              </td>
-              <td style="padding:10px;width:75%;vertical-align:middle;padding-left:40px;">
-                <a style="color: black; font-size: medium; font-weight: bold;" href="http://lcs2.iiitd.edu.in/" <p><u>LCS2, IIIT
-                    Delhi</u></p></a>
-                <p style="color: rebeccapurple; font-size: larger;">Remote Research Intern</p>
-                <p style="font-size: larger;">Worked on Conversational Systems</p>
-                <br>
-                <p></p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
-          <tbody>
-        
-            <tr>
-              <td style="padding:20px;width:25%;vertical-align:middle">
-                <div class="one">
-                  <img src='images/ceeri_logo.png' width="160" height="160">
-                </div>
-              </td>
-              <td style="padding:10px;width:75%;vertical-align:middle;padding-left:40px;">
-                <a style="color: black; font-size: medium; font-weight: bold;" href="https://www.ceeri.res.in/"
-                  <p><u>CSIR-CEERI, Pilani</u></p></a>
-                <p style="color:rebeccapurple;font-size: larger;">Research Intern</p>
-                <p style="font-size: larger;">Worked on Driver Drowsiness Detection</p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+  <main>
+    <!-- Hero -->
+    <section class="hero" id="about">
+      <div class="hero-grid">
+        <div class="hero-text">
+          <span class="hero-greeting">Founding AI Engineer &amp; Researcher</span>
+          <h1 class="hero-name">Ganeshan<br>Malhotra</h1>
+          <p class="hero-tagline">
+            Founding AI Engineer at <a href="https://www.aurasell.ai">Aurasell AI</a>. Previously Founding ML Engineer at <a href="https://www.sybill.ai">Sybill.ai</a>. MS in Machine Learning &amp; Data Science from <a href="https://www.ucsd.edu">UC San Diego</a>. Researching deep learning, NLP, and computational linguistics &mdash; working towards human-like interactive agents that comprehensively understand the world.
+          </p>
+          <div class="hero-links">
+            <a href="mailto:ganeshanmalhotra@gmail.com" class="hero-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              Email
+            </a>
+            <a href="data/Resume_Ganeshan_Publications.pdf" class="hero-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+              Resume
+            </a>
+            <a href="data/MY_CV.pdf" class="hero-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              CV
+            </a>
+            <a href="https://linkedin.com/in/ganeshan007" class="hero-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+              LinkedIn
+            </a>
+            <a href="https://scholar.google.com/citations?user=P9q5ZPwAAAAJ&hl=en&authuser=1" class="hero-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              Scholar
+            </a>
+            <a href="https://github.com/ganeshan007/" class="hero-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65S8.93 17.38 9 18v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+              GitHub
+            </a>
+          </div>
+        </div>
+        <div class="hero-photo-wrapper">
+          <div class="hero-photo-frame">
+            <img src="images/avatar.jpg" alt="Ganeshan Malhotra" class="hero-photo">
+            <div class="hero-photo-decoration">G</div>
+          </div>
+        </div>
+      </div>
+    </section>
 
+    <!-- News -->
+    <section id="news">
+      <div class="reveal">
+        <span class="section-label">Updates</span>
+        <h2 class="section-title">Latest News</h2>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item reveal reveal-delay-1">
+          <div class="timeline-date">2025</div>
+          <div class="timeline-content">Joined <a href="https://www.aurasell.ai">Aurasell AI</a> as Founding AI Engineer</div>
+        </div>
+        <div class="timeline-item reveal reveal-delay-1">
+          <div class="timeline-date">February 2024</div>
+          <div class="timeline-content">Joined <a href="https://www.sybill.ai">Sybill.ai</a> as Founding Machine Learning Engineer</div>
+        </div>
+        <div class="timeline-item reveal reveal-delay-1">
+          <div class="timeline-date">September 2023</div>
+          <div class="timeline-content">Researcher at <a href="https://www.ucsd.edu">UC San Diego</a></div>
+        </div>
+        <div class="timeline-item reveal reveal-delay-1">
+          <div class="timeline-date">June 2023</div>
+          <div class="timeline-content">Started working as a Machine Learning Engineer Intern at <a href="https://www.sybill.ai">Sybill.ai</a></div>
+        </div>
+        <div class="timeline-item reveal reveal-delay-1">
+          <div class="timeline-date">September 2022</div>
+          <div class="timeline-content">Started graduate studies at <a href="https://www.ucsd.edu">University of California, San Diego</a></div>
+        </div>
+        <div class="timeline-item reveal reveal-delay-1">
+          <div class="timeline-date">May 2022</div>
+          <div class="timeline-content">Paper accepted at <a href="https://www.lcs2.in/CONSTRAINT-2022/">CONSTRAINT</a> (co-located with ACL), 2022</div>
+        </div>
+        <div class="timeline-item reveal reveal-delay-1">
+          <div class="timeline-date">October 2021</div>
+          <div class="timeline-content">Paper accepted at <a href="https://www.wsdm-conference.org/2022/">ACM WSDM, 2022</a></div>
+        </div>
+        <div class="timeline-item reveal reveal-delay-1">
+          <div class="timeline-date">August 2021</div>
+          <div class="timeline-content">Paper accepted at <a href="https://icmi.acm.org/2021/">ACM-ICMI, 2021</a></div>
+        </div>
+        <div class="timeline-item reveal reveal-delay-1">
+          <div class="timeline-date">July 2021</div>
+          <div class="timeline-content">Joined <a href="https://www.quantiphi.com">Quantiphi, Inc.</a> as Machine Learning Engineer</div>
+        </div>
+        <div class="timeline-item reveal reveal-delay-1">
+          <div class="timeline-date">June 2021</div>
+          <div class="timeline-content">Graduated from BITS Pilani, K.K. Birla Goa Campus</div>
+        </div>
+        <div class="timeline-item reveal reveal-delay-1">
+          <div class="timeline-date">December 2020</div>
+          <div class="timeline-content">Volunteer at COLING 2020</div>
+        </div>
+        <div class="timeline-item reveal reveal-delay-1">
+          <div class="timeline-date">November 2020</div>
+          <div class="timeline-content">Volunteer at EMNLP 2020</div>
+        </div>
+      </div>
+    </section>
 
-        <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-            <tr>
-            <td style="padding:20px;width:100%;vertical-align:middle">
-              <heading>Publications</heading>
-            </td>
-          </tr>
-        </tbody></table>
-        
-        <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-          <tr>
-            <td style="padding:20px;width:25%;vertical-align:middle">
-              <div class="one">
-                <img src='images/Constraint-image.png' width="160" height="120">
-              </div>
-            </td>
-            <td style="padding:20px;width:75%;vertical-align:middle">
-              <a href="https://aclanthology.org/2022.constraint-1.8/">
-                <papertitle style="font-size: larger;">Document Retrieval and Claim Verification
-                to Mitigate COVID-19 Misinformation</papertitle>
-              </a>
-              <br>
-              <a style="color: black;" href="https://scholar.google.com/citations?user=vbmdVSAAAAAJ&hl=en">Megha Sundriyal</a>,
-              <strong>Ganeshan Malhotra</strong>,
-              <a style="color: black;" href="http://faculty.iiitd.ac.in/~shad.akhtar/">Md. Shad Akhtar</a>,
-              <a style="color: black;" href="https://scholar.google.co.in/citations?user=-x6lLvcAAAAJ&hl=en">Shubhashis Sengupta</a>,
-              <a style="color: black;" href="https://scholar.google.com/citations?user=IvwNz6UAAAAJ&hl=en">Andrew Fano</a>,
-              <a style="color: black;" href="http://faculty.iiitd.ac.in/~tanmoy/">Tanmoy Chakraborty</a>
-          
-              <br>
-              <p>
-          
-              </p>
-              <em style="color: rebeccapurple;">Second Workshop on Combating Online Hostile Posts in Regional Languages during Emergency Situation, 2022</em>
-              <br>
-              <p></p>
-            </td>
-          </tr>
-          
-          
-          
-          <tr>
-            <td style="padding:20px;width:25%;vertical-align:middle">
-              <div class="one">
-                <img src='images/LCS2_paper.png' width="160" height="120">
-              </div>
-            </td>
-            <td style="padding:20px;width:75%;vertical-align:middle">
-              <a href="https://dl.acm.org/doi/10.1145/3488560.3498509">
-                <papertitle style="font-size: larger;">Speaker and Time-aware Joint Contextual Learning for Dialogue-act Classification in Counselling Conversations</papertitle>
-              </a>
-              <br>
-              <strong>Ganeshan Malhotra</strong>,
-              <a style="color: black;" href="https://scholar.google.com/citations?hl=en&user=I0hRiBYAAAAJ&view_op=list_works&sortby=pubdate">Abdul Waheed</a>,
-              <a style="color: black;" href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwjY2ZG-6sbzAhXFX30KHafKD2sQFnoECAMQAQ&url=https%3A%2F%2Fin.linkedin.com%2Fin%2Fas3eem&usg=AOvVaw0hhK1sJrGfcUQz3q2LPOuI">Aseem Srivastava</a>,
-              <a style="color: black;" href="http://faculty.iiitd.ac.in/~shad.akhtar/">Md. Shad Akhtar</a>,
-              <a style="color: black;" href="http://faculty.iiitd.ac.in/~tanmoy/">Tanmoy Chakraborty</a>
+    <!-- Education -->
+    <section id="education">
+      <div class="reveal">
+        <span class="section-label">Background</span>
+        <h2 class="section-title">Education</h2>
+      </div>
+      <div class="edu-grid">
+        <div class="edu-card reveal reveal-delay-1">
+          <img src="images/ucsd-logo.png" alt="UCSD" class="edu-logo">
+          <div class="edu-info">
+            <h3>University of California, San Diego</h3>
+            <p>M.S. in Machine Learning &amp; Data Science, 2022 &ndash; Present</p>
+          </div>
+        </div>
+        <div class="edu-card reveal reveal-delay-2">
+          <img src="images/bits_logo.png" alt="BITS Pilani" class="edu-logo">
+          <div class="edu-info">
+            <h3>BITS Pilani, K.K. Birla Goa Campus</h3>
+            <p>B.E. in Electronics &amp; Instrumentation, 2017 &ndash; 2021</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-              <br>
-              <p>
+    <!-- Experience -->
+    <section id="experience">
+      <div class="reveal">
+        <span class="section-label">Career</span>
+        <h2 class="section-title">Experience</h2>
+      </div>
+      <div class="exp-list">
+        <a href="https://www.aurasell.ai" class="exp-card reveal reveal-delay-1" target="_blank">
+          <div class="exp-logo-wrap">
+            <img src="images/aurasell_logo.svg" alt="Aurasell AI" class="aurasell-logo">
+          </div>
+          <div class="exp-details">
+            <div class="exp-org">Aurasell AI</div>
+            <div class="exp-role">Founding AI Engineer</div>
+            <div class="exp-desc">Building the AI-native CRM platform for B2B sales teams.</div>
+          </div>
+        </a>
+        <a href="https://www.sybill.ai" class="exp-card reveal reveal-delay-1" target="_blank">
+          <div class="exp-logo-wrap">
+            <img src="images/sybill_logo.jpeg" alt="Sybill.ai">
+          </div>
+          <div class="exp-details">
+            <div class="exp-org">Sybill.ai</div>
+            <div class="exp-role">Founding Machine Learning Engineer</div>
+            <div class="exp-desc">Built a high-performance neural search engine combining dense + BM25 retrieval across 100M+ docs. Engineered LLM-powered copilot with autonomous agent frameworks.</div>
+          </div>
+        </a>
+        <a href="https://datascience.ucsd.edu" class="exp-card reveal reveal-delay-1" target="_blank">
+          <div class="exp-logo-wrap">
+            <img src="images/ucsd-logo.png" alt="UC San Diego">
+          </div>
+          <div class="exp-details">
+            <div class="exp-org">UC San Diego</div>
+            <div class="exp-role">Researcher</div>
+            <div class="exp-desc">Machine learning research at the Halıcıoğlu Data Science Institute.</div>
+          </div>
+        </a>
+        <a href="https://www.sybill.ai" class="exp-card reveal reveal-delay-1" target="_blank">
+          <div class="exp-logo-wrap">
+            <img src="images/sybill_logo.jpeg" alt="Sybill.ai">
+          </div>
+          <div class="exp-details">
+            <div class="exp-org">Sybill.ai</div>
+            <div class="exp-role">Machine Learning Engineer Intern</div>
+          </div>
+        </a>
+        <a href="https://www.quantiphi.com" class="exp-card reveal reveal-delay-1" target="_blank">
+          <div class="exp-logo-wrap">
+            <img src="data/quantiphi_gif.gif" alt="Quantiphi">
+          </div>
+          <div class="exp-details">
+            <div class="exp-org">Quantiphi, Inc.</div>
+            <div class="exp-role">Machine Learning Engineer</div>
+            <div class="exp-desc">GCP Applied AI team &mdash; delivering projects across Computer Vision and Natural Language Processing.</div>
+          </div>
+        </a>
+        <a href="https://www.inf.uni-hamburg.de/en/inst/ab/lt/home.html" class="exp-card reveal reveal-delay-1" target="_blank">
+          <div class="exp-logo-wrap">
+            <img src="images/LTgroup.jpg" alt="LT Group Hamburg">
+          </div>
+          <div class="exp-details">
+            <div class="exp-org">Language Technology Group, University of Hamburg</div>
+            <div class="exp-role">Research Collaborator</div>
+            <div class="exp-desc">Cross-modal learning &mdash; enhancing text comprehension by incorporating visual cues.</div>
+          </div>
+        </a>
+        <a href="http://lcs2.iiitd.edu.in/" class="exp-card reveal reveal-delay-1" target="_blank">
+          <div class="exp-logo-wrap">
+            <img src="images/lcs2.png" alt="LCS2 IIIT Delhi">
+          </div>
+          <div class="exp-details">
+            <div class="exp-org">LCS2, IIIT Delhi</div>
+            <div class="exp-role">Remote Research Intern</div>
+            <div class="exp-desc">Research on conversational systems.</div>
+          </div>
+        </a>
+        <a href="https://www.ceeri.res.in/" class="exp-card reveal reveal-delay-1" target="_blank">
+          <div class="exp-logo-wrap">
+            <img src="images/ceeri_logo.png" alt="CSIR-CEERI">
+          </div>
+          <div class="exp-details">
+            <div class="exp-org">CSIR-CEERI, Pilani</div>
+            <div class="exp-role">Research Intern</div>
+            <div class="exp-desc">Driver drowsiness detection research.</div>
+          </div>
+        </a>
+      </div>
+    </section>
 
-              </p>
-              <em style="color: rebeccapurple;">ACM International Conference on Web Search and Data Mining (WSDM), 2022</em>  
-              <br>
-              <p></p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:20px;width:25%;vertical-align:middle">
-              <div class="one">
-                <img src='images/multi-modal-paper-hamburg.jpg' width="160" height="120">
-              </div>
-            </td>
-            <td style="padding:20px;width:75%;vertical-align:middle">
-              <a href="https://dl.acm.org/doi/abs/10.1145/3462244.3481002">
-                <papertitle style="font-size: larger;">Gaze-based Multimodal Meaning Recovery for Noisy/Complex Environments</papertitle>
-              </a>
-              <br>
-              
-              <a style="color: black;" href="https://scholar.google.de/citations?user=1_O0QmMAAAAJ&hl=en">Ozge Alacam</a>,
-              <strong>Ganeshan Malhotra</strong>,
-              <a style="color: black;" href="https://www.inf.uni-hamburg.de/en/inst/ab/lt/people/alumni/eugen-ruppert.html">Eugen Ruppert</a>,
-              <a style="color: black;" href="https://scholar.google.de/citations?user=BdwP-3QAAAAJ&hl=en">Chris Biemann</a>
-              <br>
-              <p>
+    <!-- Publications -->
+    <section id="publications">
+      <div class="reveal">
+        <span class="section-label">Research</span>
+        <h2 class="section-title">Publications</h2>
+      </div>
+      <div class="pub-list">
+        <a href="https://aclanthology.org/2022.constraint-1.8/" class="pub-card reveal reveal-delay-1" target="_blank">
+          <div class="pub-image-wrap">
+            <img src="images/Constraint-image.png" alt="Document Retrieval paper">
+          </div>
+          <div class="pub-details">
+            <div class="pub-title">Document Retrieval and Claim Verification to Mitigate COVID-19 Misinformation</div>
+            <div class="pub-authors">Megha Sundriyal, <strong>Ganeshan Malhotra</strong>, Md. Shad Akhtar, Shubhashis Sengupta, Andrew Fano, Tanmoy Chakraborty</div>
+            <div class="pub-venue">CONSTRAINT (co-located with ACL), 2022</div>
+          </div>
+        </a>
+        <a href="https://dl.acm.org/doi/10.1145/3488560.3498509" class="pub-card reveal reveal-delay-1" target="_blank">
+          <div class="pub-image-wrap">
+            <img src="images/LCS2_paper.png" alt="Dialogue-act Classification paper">
+          </div>
+          <div class="pub-details">
+            <div class="pub-title">Speaker and Time-aware Joint Contextual Learning for Dialogue-act Classification in Counselling Conversations</div>
+            <div class="pub-authors"><strong>Ganeshan Malhotra</strong>, Abdul Waheed, Aseem Srivastava, Md. Shad Akhtar, Tanmoy Chakraborty</div>
+            <div class="pub-venue">ACM WSDM, 2022</div>
+          </div>
+        </a>
+        <a href="https://dl.acm.org/doi/abs/10.1145/3462244.3481002" class="pub-card reveal reveal-delay-1" target="_blank">
+          <div class="pub-image-wrap">
+            <img src="images/multi-modal-paper-hamburg.jpg" alt="Gaze-based Multimodal paper">
+          </div>
+          <div class="pub-details">
+            <div class="pub-title">Gaze-based Multimodal Meaning Recovery for Noisy/Complex Environments</div>
+            <div class="pub-authors">Ozge Alacam, <strong>Ganeshan Malhotra</strong>, Eugen Ruppert, Chris Biemann</div>
+            <div class="pub-venue">ACM-ICMI, 2021</div>
+          </div>
+        </a>
+        <a href="https://ieeexplore.ieee.org/document/9239456" class="pub-card reveal reveal-delay-1" target="_blank">
+          <div class="pub-image-wrap">
+            <img src="images/naveen_paper.png" alt="OFDMA NOMA paper">
+          </div>
+          <div class="pub-details">
+            <div class="pub-title">Outage Analysis of OFDMA Based NOMA Aided Full-Duplex Cooperative D2D System</div>
+            <div class="pub-authors">Rahul Bajpai, Rahul Kulkarni, <strong>Ganeshan Malhotra</strong>, Naveen Gupta</div>
+            <div class="pub-venue">International Conference on Telecommunications, 2020</div>
+          </div>
+        </a>
+      </div>
+    </section>
+  </main>
 
-              </p>
-              <em style="color: rebeccapurple;">ACM International Conference on Multimodal Interaction(ACM-ICMI 2021)</em>  
-              <br>
-              <p></p>
-            </td>
-          </tr>
+  <footer>
+    <p>&copy; 2026 Ganeshan Malhotra &middot; <a href="mailto:ganeshanmalhotra@gmail.com">ganeshanmalhotra@gmail.com</a></p>
+  </footer>
 
-          <tr>
-            <td style="padding:20px;width:25%;vertical-align:middle">
-              <div class="one">
-                <img src='images/naveen_paper.png' width="160">
-              </div>
-            </td>
-            <td style="padding:20px;width:75%;vertical-align:middle">
-              <a href="https://ieeexplore.ieee.org/document/9239456">
-                <papertitle style="font-size: larger;">Outage Analysis of OFDMA Based NOMA Aided Full-Duplex Cooperative D2D System</papertitle>
-              </a>
-              <br>
-              
-              <a style="color: black;" href="https://scholar.google.com/citations?user=rtr1St4AAAAJ&hl=en">Rahul Bajpai</a>,
-              <a style="color: black;" href="https://linkedin.com/in/adwait-kulkarni-672445163">Rahul Kulkarni</a>,
-              <strong>Ganeshan Malhotra</strong>,
-              <a style="color: black;" href="https://www.bits-pilani.ac.in/goa/naveeng/profile">Naveen Gupta</a>,
-              <br>
-              <p>
+  <script>
+    // Theme toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', next === 'dark' ? '' : 'light');
+      if (next === 'dark') html.removeAttribute('data-theme');
+      else html.setAttribute('data-theme', 'light');
+      localStorage.setItem('theme', next);
+    }
+    (function() {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    })();
 
-              </p>
-              <em style="color: rebeccapurple;">International Conference on Telecommunications, 2020</em>  
-              <br>
-              <p></p>
-            </td>
-          </tr>
-        </tbody></table>
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
 
-        
-        <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-          <tr>
-            <td style="padding:0px">
-              <br>
-              <p style="text-align:right;font-size:small;">
-                <a href="https://github.com/jonbarron/jonbarron_website">Original Template</a>
-              </p>
-            </td>
-          </tr>
-        </tbody></table>
-      </td>
-    </tr>
-  </table>
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Mobile menu
+    function toggleMenu() {
+      document.getElementById('mobileNav').classList.toggle('open');
+      document.querySelector('.hamburger').classList.toggle('open');
+    }
+    function closeMenu() {
+      document.getElementById('mobileNav').classList.remove('open');
+      document.querySelector('.hamburger').classList.remove('open');
+    }
+  </script>
 </body>
-
-<!-- Note to anyone copying the HTML for the following counter: 
-the counter name ("username" on this page) must be unique.
-Otherwise different pages will increment the same counter. See
-http://stuff.mit.edu/doc/counter-howto.html. -->
-
-This page has been accessed at least
-<a href="https://ganeshan007.github.io/website/"><img 
-src="http://stuff.mit.edu/cgi/counter/Ganeshan007" alt="several"></a>
-times since 09/12/2020
-<!-- shouldn't happen, but include the disclaimer anyway -->
-<!-- or January 29, 1996, > 
-<!-- when the counter with this name was first used --> 
-
 </html>

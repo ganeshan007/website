@@ -373,68 +373,30 @@ slimclaw-setup</code></pre>
 
     <h2>What I learned building it</h2>
 
-    <h3>neonize's Go runtime doesn't play nice with Python</h3>
-
     <p>
-      SlimClaw uses <a href="https://github.com/krypton-byte/neonize">neonize</a>, a Python binding for whatsmeow (Go-based WhatsApp library). The problem: neonize's callbacks run in Go threads, not the Python asyncio thread. Every SQLite call from a callback crashed with "objects created in a thread can only be used in that same thread." The fix: <code>call_soon_threadsafe</code> to dispatch everything to the asyncio loop.
+      Bridging Python's asyncio with a Go runtime (neonize/whatsmeow) was the hardest part. Go threads don't respect Python's thread-local storage, so every database call from a callback crashed until I dispatched everything through <code>call_soon_threadsafe</code>. The Go runtime also ignores <code>os._exit()</code> &mdash; the only way to terminate the process after authentication is <code>SIGKILL</code>.
     </p>
 
     <p>
-      Worse, <code>os._exit(0)</code> doesn't kill the Go runtime. The process stays alive after authentication because Go threads keep running. I ended up using <code>SIGKILL</code> from a Go thread callback with pre-captured closure references &mdash; the only reliable way to terminate.
-    </p>
-
-    <h3>Timestamps in milliseconds, not seconds</h3>
-
-    <p>
-      neonize returns timestamps in milliseconds. The guard check (<code>> year 2100</code>) rejected every single message as "year 58112." One line fix, hours of debugging.
-    </p>
-
-    <h3>The duplicate container race condition</h3>
-
-    <p>
-      At startup, <code>_recover_pending_messages()</code> and <code>_start_message_loop()</code> both find the same unprocessed messages. Both call <code>enqueue_message_check()</code>. Both see <code>state.active = False</code> because <code>asyncio.create_task</code> doesn't execute immediately &mdash; it just schedules. Two containers spawn for the same group.
+      The concurrency model needed careful thought. <code>asyncio.create_task</code> schedules but doesn't execute immediately, which creates a window where two callers can both see a resource as "free" and spawn duplicate work. The fix is simple once you see it: claim the resource at scheduling time, not execution time. The same pattern showed up three times &mdash; in message processing, task scheduling, and container lifecycle management.
     </p>
 
     <p>
-      Fix: set <code>state.active = True</code> at scheduling time, not inside the async task.
+      The onboarding taught me the most. Every assumption I made about what users know was wrong. "Main channel" means nothing without explaining it's the private chat where you admin the bot. JIDs are internal identifiers that should never be shown. "Channel" should be "app." The best setup flow is one where the user never has to edit a config file or run SQL.
     </p>
 
-    <h3>Scheduled tasks that never run</h3>
+    <h2>Design decisions</h2>
+
+    <h3>Skills over Features</h3>
 
     <p>
-      The scheduler polls <code>get_due_tasks()</code> every 60 seconds. A task is "due" if <code>next_run &lt;= now</code>. But <code>next_run</code> doesn't update until the task finishes executing. So the same task gets re-enqueued on every poll. And if the inflight tracker marks it before the queue actually runs it, the task is stuck forever.
+      Instead of building every integration into the codebase, SlimClaw uses <a href="https://docs.anthropic.com/en/docs/claude-code/skills">Claude Code skills</a> &mdash; markdown files in <code>.claude/skills/</code> that teach Claude Code how to transform the project. Want Telegram? If the skill exists, the setup wizard routes to it. If it doesn't, it tells you how to contribute one. The core stays small.
     </p>
 
-    <p>
-      Three separate fixes for this: inflight tracking moved inside the execution wrapper, idle container stdin closed when a task is queued, and a 15-second scheduler startup delay so WhatsApp can connect first.
-    </p>
-
-    <h2>The "Skills over Features" approach</h2>
+    <h3>Group auto-detection</h3>
 
     <p>
-      Instead of building every integration into the codebase, SlimClaw uses <a href="https://docs.anthropic.com/en/docs/claude-code/skills">Claude Code skills</a>. A skill is a markdown file in <code>.claude/skills/</code> that teaches Claude Code how to transform the project.
-    </p>
-
-    <p>
-      Want Telegram support? If <code>.claude/skills/add-telegram/SKILL.md</code> exists, the setup wizard routes to it. If it doesn't, it tells you how to contribute one. The core stays small.
-    </p>
-
-    <p>
-      Current skills: <code>/setup</code> (onboarding), <code>/customize</code> (add apps, change behavior), <code>/debug</code> (container troubleshooting).
-    </p>
-
-    <h2>Auto-detection in unregistered groups</h2>
-
-    <p>
-      One pattern I borrowed from neither NanoClaw nor nanobot: when someone mentions <code>@TARS</code> in a WhatsApp group that isn't registered, instead of silently ignoring it, SlimClaw sends a notification to your main channel:
-    </p>
-
-    <blockquote>
-      Alice mentioned @TARS in <strong>Family Chat</strong> (not registered). To add this group, say: <strong>join Family Chat</strong>
-    </blockquote>
-
-    <p>
-      You reply "join Family Chat" and the group is registered. No JIDs, no JSON files, no SQL. Just natural language.
+      When someone mentions <code>@TARS</code> in a WhatsApp group that isn't registered, SlimClaw notifies your main channel instead of silently ignoring it. You reply "join Family Chat" and the group is live. No config files, no database commands &mdash; just natural language.
     </p>
 
     <h2>Benchmarks</h2>

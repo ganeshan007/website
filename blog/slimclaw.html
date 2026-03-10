@@ -325,7 +325,7 @@
   </nav>
 
   <article>
-    <div class="article-meta">February 2026 &middot; Project</div>
+    <div class="article-meta">February 2026 &middot; Updated March 2026 &middot; Project</div>
 
     <h1>SlimClaw: A Personal AI Assistant You Can Set Up in 5 Minutes</h1>
 
@@ -391,13 +391,27 @@ slimclaw-setup</code></pre>
     <h3>Skills over Features</h3>
 
     <p>
-      Instead of building every integration into the codebase, SlimClaw uses <a href="https://docs.anthropic.com/en/docs/claude-code/skills">Claude Code skills</a> &mdash; markdown files in <code>.claude/skills/</code> that teach Claude Code how to transform the project. Want Telegram? If the skill exists, the setup wizard routes to it. If it doesn't, it tells you how to contribute one. The core stays small.
+      Instead of building every integration into the codebase, SlimClaw uses <a href="https://docs.anthropic.com/en/docs/claude-code/skills">Claude Code skills</a> &mdash; markdown files in <code>.claude/skills/</code> that teach Claude Code how to transform the project. Want Telegram? Run <code>/add-telegram</code> and the AI agent writes the actual integration code. If a skill doesn't exist, the setup wizard tells you how to contribute one. The core stays small.
     </p>
 
-    <h3>Group auto-detection</h3>
+    <p>
+      Andrej Karpathy <a href="https://x.com/kaboroevich/status/1894839775182143954">noticed this pattern</a> in NanoClaw and called it "a new, AI-enabled approach to preventing config mess and if-then-else monsters." His framing: "the implied new meta is to write the most maximally forkable repo and then have skills that fork it into any desired more exotic configuration." That's exactly what SlimClaw is designed around &mdash; a minimal kernel that grows through skills, not feature flags.
+    </p>
+
+    <h3>Modular app system</h3>
 
     <p>
-      When someone mentions <code>@TARS</code> in a WhatsApp group that isn't registered, SlimClaw notifies your main channel instead of silently ignoring it. You reply "join Family Chat" and the group is live. No config files, no database commands &mdash; just natural language.
+      SlimClaw started as WhatsApp-only. Now the app system is fully modular &mdash; adding support for any messaging platform (Telegram, Discord, Slack, Signal) means creating a single Python file in <code>channels/</code>. No changes to <code>main.py</code> or core code. The registry auto-discovers app classes at startup using <code>pkgutil.iter_modules</code>, and apps with missing dependencies are silently skipped.
+    </p>
+
+    <p>
+      There's even an LLM-readable skill (<code>/add-app-template</code>) that teaches any AI agent how to create a new app integration &mdash; the Channel protocol, JID convention, message handler pattern, credential handling, and optional dependency setup. The goal: someone can instruct an LLM to add support for any app without reading the source.
+    </p>
+
+    <h3>Group management</h3>
+
+    <p>
+      When someone mentions <code>@TARS</code> in a WhatsApp group that isn't registered, SlimClaw notifies your main channel instead of silently ignoring it. You reply "join Family Chat" and the group is live. Want to remove a group? Say "unregister Family Chat" &mdash; handled through the same file-based IPC with authorization checks (only the main channel can register or unregister groups).
     </p>
 
     <h2>Benchmarks</h2>
@@ -438,7 +452,7 @@ slimclaw-setup</code></pre>
         </tr>
         <tr>
           <td>Source lines</td>
-          <td>4,670</td>
+          <td>4,860</td>
           <td>6,650</td>
         </tr>
       </tbody>
@@ -455,7 +469,8 @@ slimclaw-setup</code></pre>
       <code>pip install slimclaw && slimclaw-setup</code>
       <p style="margin-top: 1rem; margin-bottom: 0;">
         <a href="https://github.com/ganeshan007/slimclaw">GitHub</a> &middot;
-        <a href="https://pypi.org/project/slimclaw/">PyPI</a>
+        <a href="https://pypi.org/project/slimclaw/">PyPI</a> &middot;
+        <a href="https://discord.gg/rfSjcbzX">Discord</a>
       </p>
     </div>
 
@@ -466,7 +481,7 @@ slimclaw-setup</code></pre>
     <hr class="divider">
 
     <p>
-      If you're running OpenClaw or NanoClaw and want something lighter, or if you tried nanobot and want container isolation, SlimClaw sits in between. It's ~4,700 lines of Python, 6 dependencies, and a setup flow that doesn't assume you have an AI IDE installed.
+      If you're running OpenClaw or NanoClaw and want something lighter, or if you tried nanobot and want container isolation, SlimClaw sits in between. It's ~4,900 lines of Python, 6 dependencies, a modular app system that any LLM can extend, and a setup flow that doesn't assume you have an AI IDE installed.
     </p>
 
   </article>
